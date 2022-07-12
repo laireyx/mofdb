@@ -1,0 +1,23 @@
+{
+  "name": "mofdb",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "migrate": "npx sequelize-cli db:migrate",
+    "unmigrate": "npx sequelize-cli db:migrate:undo",
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^16.0.1",
+    "download": "^8.0.0",
+    "mysql2": "^2.3.3",
+    "pdfjs-dist": "^2.14.305",
+    "sequelize": "^6.21.2",
+    "tough-cookie": "^4.0.0"
+  }
+}

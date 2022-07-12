@@ -1,0 +1,13 @@
+# nodejs modules
+node_modules/
+
+# configurations
+.env
+config/
+
+# PorousDB and Downloaded PDFs
+data/
+pdfs/
+
+# Result and logs
+logs/
