@@ -97,8 +97,10 @@ module.exports = class ChemicalRegularizer extends Regularizer {
           );
 
           parseResult.forEach((result, i) => {
-            if (result.every((r, i) => i === 0 || r === result[i - 1]))
+            if (result.every((r, i) => i === 0 || r === result[i - 1])) {
+              if (result[0] === "") return;
               mof[`namePrecursor${ligandIndices[i]}`] = result[0];
+            }
           });
 
           await mof.save();
