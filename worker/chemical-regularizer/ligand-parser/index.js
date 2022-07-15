@@ -9,7 +9,7 @@ module.exports = class LigandParser {
       .replace(/\s?([·,\-'/()/\[\]\{\}])\s?/g, "·")
       .replace(/(?<!\d) ?(\d+) ?(?!\d)/g, "$1")
       .replace(/\s+/g, " ")
-      .replace(/′+/g, "'")
+      .replace(/′’+/g, "'")
       .replace(/[·•×\$]+/g, "·")
       .replace(/[\-–]+/g, "-")
       .replace(/^[,·\-\s]+/g, "") // TrimStart
@@ -42,14 +42,13 @@ module.exports = class LigandParser {
         const matched = fullText.match(ligandRegex);
         if (matched) {
           const trimmedString = matched[0]
-            .replace(/^.*(and|of|with|by|on|the|from|the)\b/i, "")
+            .replace(/^.*(and|of|with|by|on|the|from|the|as|two)\b/i, "")
             .replace(
-              /^.*(using|(metallo)?ligands?|used|selected|namely|linkers|choose|chose|complex(es)?)/,
+              /^.*?(using|(metallo)?ligands?|used|selected|namely|linkers|choose|chose|complex(es)?|formula|polymer)/,
               ""
             )
             .replace(/\(\s*(H\s*\d*)?\s*L\s*\d*?\s*\)$/g, "")
-            .replace(/^,/, "")
-            .replace(/^\s+/, "")
+            .replace(/^(,|\s|·)+/, "")
             .replace(/\s+$/, "");
 
           const regularizedString = this.regularizeString(trimmedString);

@@ -11,7 +11,7 @@ module.exports = class StringRegularizer extends Regularizer {
       .replace(/\s?([·,\-'/()/\[\]\{\}])\s?/g, "·")
       .replace(/(?<!\d) ?(\d+) ?(?!\d)/g, "$1")
       .replace(/\s+/g, " ")
-      .replace(/′+/g, "'")
+      .replace(/′’+/g, "'")
       .replace(/[·•×\$]+/g, "·")
       .replace(/[\-–]+/g, "-")
       .replace(/^[,·\-\s]+/g, "") // TrimStart
