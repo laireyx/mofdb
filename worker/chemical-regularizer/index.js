@@ -83,11 +83,6 @@ module.exports = class ChemicalRegularizer extends Regularizer {
             ligands,
           });
 
-          this.logger.i(
-            "ChemicalRegularizer",
-            `${pdf}\n${JSON.stringify(parseResult, null, 2)}`
-          );
-
           if (parseResult.every((eachLigand) => eachLigand.length === 0)) {
             this.logger.e(
               "ChemicalRegularizer",
@@ -95,6 +90,11 @@ module.exports = class ChemicalRegularizer extends Regularizer {
             );
             return;
           }
+
+          this.logger.i(
+            "ChemicalRegularizer",
+            `${pdf}\n${JSON.stringify(parseResult, null, 2)}`
+          );
 
           parseResult.forEach((result, i) => {
             if (result.every((r, i) => i === 0 || r === result[i - 1]))
