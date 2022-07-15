@@ -11,9 +11,13 @@ module.exports = class Logger {
 
   task = {
     name: "",
-    startDate: 0,
     lastETA: 0,
     progress: { max: 0, current: 0 },
+  };
+
+  progressLog = {
+    prevRate: 0,
+    prevDate: 0,
   };
 
   /**
@@ -55,15 +59,17 @@ module.exports = class Logger {
    * @param {string} task.name
    * @param {number} task.max
    */
-  startTask({ name = "Dummy task", max = 1 } = {}) {
+  startTask({ name = "Dummy task", max = 0 } = {}) {
     if (this.task.progress.max !== this.task.progress.current)
       process.stdout.write("\n");
 
     this.task.name = name;
-    this.task.startDate = Date.now();
 
-    this.task.progress.max = Math.max(max, 1);
+    this.task.progress.max = Math.max(max, 0);
     this.task.progress.current = 0;
+
+    this.progressLog.prevRate = 0;
+    this.progressLog.prevDate = Date.now();
 
     this.printTask();
   }
@@ -83,12 +89,15 @@ module.exports = class Logger {
    * Print a task logging
    */
   printTask() {
-    const taskRate = this.task.progress.current / this.task.progress.max;
-    const taskDuration = (Date.now() - this.task.startDate) / 1000;
-    const currentETA = ~~(taskRate > 0
-      ? (taskDuration / taskRate) * (1 - taskRate)
-      : 0); // ETA(in seconds)
-    const ETA = ~~(this.task.lastETA * 0.5 + currentETA * 0.5);
+    const taskRate = this.task.progress.max
+      ? this.task.progress.current / this.task.progress.max
+      : 0;
+    const progressPerSeconds =
+      (taskRate - this.progressLog.prevRate) /
+      ((Date.now() - this.progressLog.prevDate) / 1000);
+    const ETA = ~~(progressPerSeconds > 0
+      ? (1 - taskRate) / progressPerSeconds
+      : 9e9);
 
     process.stdout.cursorTo(0);
     process.stdout.write(`[\x1b[32m${this.task.name}\x1b[0m]`);
@@ -115,8 +124,13 @@ module.exports = class Logger {
     );
     process.stdout.clearLine(1);
 
-    this.task.lastETA = ETA;
-    if (this.task.progress.max !== this.task.progress.current)
+    this.progressLog.prevRate = taskRate;
+    this.progressLog.prevDate = Date.now();
+
+    if (
+      this.task.progress.max === 0 ||
+      this.task.progress.max !== this.task.progress.current
+    )
       setTimeout(() => this.printTask(), 1000);
   }
 

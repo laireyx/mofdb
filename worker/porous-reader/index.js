@@ -79,19 +79,17 @@ module.exports = class PorousReader extends Reader {
       if (!porousObj.name) throw new Error(`No name`);
       if (this.buildDb) await MOF.create(porousObj);
     } catch (err) {
-      console.error(err);
       this.logger.e("Reader", `${porous} ${err.message}`);
     }
   }
 
   async read({} = {}) {
+    this.logger.startTask({ name: "Reading PorousDB" });
+
     await Promise.all(
       this.workDir.map(async (dir) => {
         const porouses = await fs.readdir(dir);
-        this.logger.startTask({
-          name: "Reading PorousDB",
-          max: porouses.length,
-        });
+        this.logger.stepTask({ curStep: 0, maxStep: porouses.length });
 
         await Promise.all(
           porouses.map(async (porous) => {

@@ -13,7 +13,7 @@ module.exports = class ChemicalRegularizer extends Regularizer {
   }
 
   async regularize() {
-    this.logger.startTask({ name: "Regularize", max: 1 });
+    this.logger.startTask({ name: "Regularize" });
 
     return await this.reader
       .read({
