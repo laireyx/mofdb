@@ -34,36 +34,9 @@ module.exports = class LigandParser {
             .replace(/^,/, "")
             .replace(/^\s+/, "");
 
-          if (trimmedString.replace(/\s/g, "").match(/\((H\d*)?L\d*?\)/))
+          if (trimmedString.replace(/\s/g, "").match(/^\((H\d*)?L\d*?\)$/))
             // Skip useless string
             return;
-
-          let pairedString = trimmedString;
-          while (1) {
-            if (pairedString.startsWith("[") && !pairedString.endsWith("]"))
-              pairedString = pairedString.slice(1);
-            else if (
-              pairedString.startsWith("{") &&
-              !pairedString.includes("}")
-            )
-              pairedString = pairedString.slice(1);
-            else if (
-              pairedString.startsWith("(") &&
-              !pairedString.includes(")")
-            )
-              pairedString = pairedString.slice(1);
-            else if (!pairedString.includes("{") && pairedString.endsWith("}"))
-              pairedString = pairedString.slice(0, -1);
-            else if (!pairedString.includes("(") && pairedString.endsWith(")"))
-              pairedString = pairedString.slice(0, -1);
-            else if (
-              (pairedString.startsWith("(") && pairedString.endsWith(")")) ||
-              (pairedString.startsWith("{") && pairedString.endsWith("}")) ||
-              (pairedString.startsWith("[") && pairedString.endsWith("]"))
-            )
-              pairedString = pairedString.slice(1, -1);
-            else break;
-          }
 
           matchResult[ligandIdx].push(trimmedString);
         }

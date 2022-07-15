@@ -83,11 +83,12 @@ module.exports = class ChemicalRegularizer extends Regularizer {
             ligands,
           });
 
-          if (
-            Object.keys(parseResult).every(
-              (ligandName) => parseResult[ligandName].length === 0
-            )
-          ) {
+          this.logger.i(
+            "ChemicalRegularizer",
+            `${pdf}\n${JSON.stringify(parseResult, null, 2)}`
+          );
+
+          if (parseResult.every((eachLigand) => eachLigand.length === 0)) {
             this.logger.e(
               "ChemicalRegularizer",
               `${pdf} : Cannot find any ligand string`
@@ -101,11 +102,6 @@ module.exports = class ChemicalRegularizer extends Regularizer {
           });
 
           await mof.save();
-
-          this.logger.i(
-            "ChemicalRegularizer",
-            `${pdf}\n${JSON.stringify(parseResult, null, 2)}`
-          );
         } catch (err) {
           console.error(err);
           this.logger.e("ChemicalRegularizer", `Failed parsing ${doi[0]}`);
