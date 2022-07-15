@@ -2,6 +2,21 @@ const pdfjs = require("pdfjs-dist/legacy/build/pdf");
 
 module.exports = class LigandParser {
   constructor() {}
+
+  regularizeString(str) {
+    return str
+      .trim()
+      .replace(/\s?([·,\-'/()/\[\]\{\}])\s?/g, "·")
+      .replace(/(?<!\d) ?(\d+) ?(?!\d)/g, "$1")
+      .replace(/\s+/g, " ")
+      .replace(/′+/g, "'")
+      .replace(/[·•×\$]+/g, "·")
+      .replace(/[\-–]+/g, "-")
+      .replace(/^[,·\-\s]+/g, "") // TrimStart
+      .replace(/[,·\-\s]+$/g, "") // TrimEnd
+      .replace(/cyclo/gi, "cyclo"); // Capital letters
+  }
+
   async parse({ pdf = "", ligands = [] }) {
     const doc = await pdfjs.getDocument({
       url: pdf,
@@ -27,18 +42,23 @@ module.exports = class LigandParser {
         const matched = fullText.match(ligandRegex);
         if (matched) {
           const trimmedString = matched[0]
+            .replace(/^.*(and|of|with|by|on|the|from|the)\b/i, "")
             .replace(
-              /^.*(using|and|of|with|by|on|the|from|(metallo)?ligands?|used|selected|namely|the|choose|chose|complex(es)?)\b/i,
+              /^.*(using|(metallo)?ligands?|used|selected|namely|linkers|choose|chose|complex(es)?)/,
               ""
             )
+            .replace(/\(\s*(H\s*\d*)?\s*L\s*\d*?\s*\)$/g, "")
             .replace(/^,/, "")
-            .replace(/^\s+/, "");
+            .replace(/^\s+/, "")
+            .replace(/\s+$/, "");
 
-          if (trimmedString.replace(/\s/g, "").match(/^\((H\d*)?L\d*?\)$/))
+          const regularizedString = this.regularizeString(trimmedString);
+
+          if (regularizedString.replace(/\s/g, "").match(/^\((H\d*)?L\d*?\)$/))
             // Skip useless string
             return;
 
-          matchResult[ligandIdx].push(trimmedString);
+          matchResult[ligandIdx].push(regularizedString);
         }
       });
     }

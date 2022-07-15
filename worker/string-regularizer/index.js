@@ -12,7 +12,7 @@ module.exports = class StringRegularizer extends Regularizer {
       .replace(/(?<!\d) ?(\d+) ?(?!\d)/g, "$1")
       .replace(/\s+/g, " ")
       .replace(/′+/g, "'")
-      .replace(/[•×\$]+/g, "·")
+      .replace(/[·•×\$]+/g, "·")
       .replace(/[\-–]+/g, "-")
       .replace(/^[,·\-\s]+/g, "") // TrimStart
       .replace(/[,·\-\s]+$/g, "") // TrimEnd
