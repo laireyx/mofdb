@@ -26,9 +26,9 @@ module.exports = class ChemicalRegularizer extends Regularizer {
       })
       .each(async (mof) => {
         if (
-          !mof?.namePrecursor1?.match(/(H\d*)?L(\d*)?/) &&
-          !mof?.namePrecursor2?.match(/(H\d*)?L(\d*)?/) &&
-          !mof?.namePrecursor3?.match(/(H\d*)?L(\d*)?/)
+          !mof?.namePrecursor1?.match(/^(H\d*)?L(\d*)?$/) &&
+          !mof?.namePrecursor2?.match(/^(H\d*)?L(\d*)?$/) &&
+          !mof?.namePrecursor3?.match(/^(H\d*)?L(\d*)?$/)
         )
           return;
         this.logger.stepTask({ curStep: 0, maxStep: 1 });
