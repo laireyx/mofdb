@@ -12,7 +12,7 @@ module.exports = class PorousReader extends Reader {
   /**
    * Reader
    * @param {object} ctor
-   * @param {string} ctor.workDir
+   * @param {string[]} ctor.workDir
    * @param {Logger} ctor.logger
    * @param {boolean} [ctor.buildDb=false]
    */
@@ -85,16 +85,20 @@ module.exports = class PorousReader extends Reader {
   }
 
   async read({} = {}) {
-    const porouses = await fs.readdir(this.workDir);
-    this.logger.startTask({
-      name: "Reading PorousDB",
-      max: porouses.length,
-    });
-
     await Promise.all(
-      porouses.map(async (porous) => {
-        await this.readEachPorous({ workDir: this.workDir, porous });
-        this.logger.stepTask();
+      this.workDir.map(async (dir) => {
+        const porouses = await fs.readdir(dir);
+        this.logger.startTask({
+          name: "Reading PorousDB",
+          max: porouses.length,
+        });
+
+        await Promise.all(
+          porouses.map(async (porous) => {
+            await this.readEachPorous({ workDir: dir, porous });
+            this.logger.stepTask();
+          })
+        );
       })
     );
   }
