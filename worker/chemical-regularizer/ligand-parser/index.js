@@ -8,12 +8,11 @@ module.exports = class LigandParser {
       verbosity: 0,
     }).promise;
 
-    const matchResult = {};
-    ligands.forEach((ligand) => (matchResult[ligand] = []));
+    const matchResult = [[], [], []];
 
     const ligandRegexes = ligands.map((ligandStr) => {
       return new RegExp(
-        "[^.;]*?" + ["\\(", ...ligandStr.split(""), "\\)"].join("\\s*"),
+        "[^.;:]*?" + ["\\(", ...ligandStr.split(""), "\\)"].join("\\s*"),
         "g"
       );
     });
@@ -27,11 +26,46 @@ module.exports = class LigandParser {
       ligandRegexes.forEach((ligandRegex, ligandIdx) => {
         const matched = fullText.match(ligandRegex);
         if (matched) {
-          const trimmedString = matched[0].replace(
-            /^.*\b(using|and|of|with|by|on|the|from|ligand|used|selected|namely)\b/,
-            ""
-          );
-          matchResult[ligands[ligandIdx]].push(trimmedString);
+          const trimmedString = matched[0]
+            .replace(
+              /^.*(using|and|of|with|by|on|the|from|(metallo)?ligands?|used|selected|namely|the|choose|chose|complex(es)?)\b/i,
+              ""
+            )
+            .replace(/^,/, "")
+            .replace(/^\s+/, "");
+
+          if (trimmedString.replace(/\s/g, "").match(/\((H\d*)?L\d*?\)/))
+            // Skip useless string
+            return;
+
+          let pairedString = trimmedString;
+          while (1) {
+            if (pairedString.startsWith("[") && !pairedString.endsWith("]"))
+              pairedString = pairedString.slice(1);
+            else if (
+              pairedString.startsWith("{") &&
+              !pairedString.includes("}")
+            )
+              pairedString = pairedString.slice(1);
+            else if (
+              pairedString.startsWith("(") &&
+              !pairedString.includes(")")
+            )
+              pairedString = pairedString.slice(1);
+            else if (!pairedString.includes("{") && pairedString.endsWith("}"))
+              pairedString = pairedString.slice(0, -1);
+            else if (!pairedString.includes("(") && pairedString.endsWith(")"))
+              pairedString = pairedString.slice(0, -1);
+            else if (
+              (pairedString.startsWith("(") && pairedString.endsWith(")")) ||
+              (pairedString.startsWith("{") && pairedString.endsWith("}")) ||
+              (pairedString.startsWith("[") && pairedString.endsWith("]"))
+            )
+              pairedString = pairedString.slice(1, -1);
+            else break;
+          }
+
+          matchResult[ligandIdx].push(trimmedString);
         }
       });
     }

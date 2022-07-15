@@ -17,13 +17,6 @@ module.exports = class ChemicalRegularizer extends Regularizer {
 
     return await this.reader
       .read({
-        attributes: [
-          Sequelize.fn("DISTINCT", Sequelize.col("doi")),
-          "doi",
-          "namePrecursor1",
-          "namePrecursor2",
-          "namePrecursor3",
-        ],
         order: [["doi", "ASC"]],
         where: {
           doi: {
@@ -47,6 +40,7 @@ module.exports = class ChemicalRegularizer extends Regularizer {
         const doi = trimmedDoi.match(/\d+[.]\d+[/][^ ]*/);
 
         const ligands = [];
+        const ligandIndices = [];
 
         try {
           if (!doi) {
@@ -57,19 +51,24 @@ module.exports = class ChemicalRegularizer extends Regularizer {
             return;
           }
 
-          if (mof?.namePrecursor1?.match(/H?\d*L/))
+          if (mof?.namePrecursor1?.match(/(H\d*)?L(\d*)?/)) {
+            ligandIndices.push(1);
             ligands.push(
-              mof.namePrecursor1.replace(/\s/g, "").match(/H?\d*L/)[0]
+              mof.namePrecursor1.replace(/\s/g, "").match(/(H\d*)?L(\d*)?/)[0]
             );
-          if (mof?.namePrecursor2?.match(/H?\d*L/))
+          }
+          if (mof?.namePrecursor2?.match(/(H\d*)?L(\d*)?/)) {
+            ligandIndices.push(2);
             ligands.push(
-              mof.namePrecursor2.replace(/\s/g, "").match(/H?\d*L/)[0]
+              mof.namePrecursor2.replace(/\s/g, "").match(/(H\d*)?L(\d*)?/)[0]
             );
-          if (mof?.namePrecursor3?.match(/H?\d*L/))
+          }
+          if (mof?.namePrecursor3?.match(/(H\d*)?L(\d*)?/)) {
+            ligandIndices.push(3);
             ligands.push(
-              mof.namePrecursor3.replace(/\s/g, "").match(/H?\d*L/)[0]
+              mof.namePrecursor3.replace(/\s/g, "").match(/(H\d*)?L(\d*)?/)[0]
             );
-
+          }
           // Cannot find legal ligand
           if (ligands.length === 0) return;
 
@@ -95,6 +94,13 @@ module.exports = class ChemicalRegularizer extends Regularizer {
             );
             return;
           }
+
+          parseResult.forEach((result, i) => {
+            if (result.every((r, i) => i === 0 || r === result[i - 1]))
+              mof[`namePrecursor${ligandIndices[i]}`] = result[0];
+          });
+
+          await mof.save();
 
           this.logger.i(
             "ChemicalRegularizer",

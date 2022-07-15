@@ -10,28 +10,24 @@ const StringRegularizer = require("./worker/string-regularizer");
 
 const fileLogger = new FileLogger();
 
-if (0) {
-  const porousReader = new PorousReader({
-    workDir: "./data/1st_only_text/1st/Porous_set_1.0.0/Porous_DB_1.0.0",
-    // workDir: "./data/2nd_1.0_only_text/2nd_1.0/Porous_DB_1.0.0/Porous_DB_1.0.0",
-    // workDir: "./data/test",
-    logger: fileLogger,
-  });
+const porousReader = new PorousReader({
+  // workDir: "./data/1st_only_text/1st/Porous_set_1.0.0/Porous_DB_1.0.0",
+  workDir: "./data/2nd_1.0_only_text/2nd_1.0/Porous_DB_1.0.0/Porous_DB_1.0.0",
+  logger: fileLogger,
+  buildDb: true,
+});
 
-  // porousReader.read();
-}
+// porousReader.read();
 
 const databaseReader = new DatabaseReader({ logger: fileLogger });
-const regularizer = new ChemicalRegularizer({
+// const regularizer = new ChemicalRegularizer({
+//   logger: fileLogger,
+//   reader: databaseReader,
+// });
+
+const regularizer = new StringRegularizer({
   logger: fileLogger,
   reader: databaseReader,
 });
-
-if (0) {
-  const regularizer = new StringRegularizer({
-    logger: fileLogger,
-    reader: databaseReader,
-  });
-}
 
 regularizer.regularize();

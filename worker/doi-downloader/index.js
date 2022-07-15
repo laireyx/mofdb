@@ -8,7 +8,7 @@ const download = require("download");
 const { CookieJar } = require("tough-cookie");
 
 module.exports = class DoiDownloader extends Downloader {
-  constructor({ logger, downloadDir = "pdfs", downloadInterval = 3000 }) {
+  constructor({ logger, downloadDir = "pdfs", downloadInterval = 7000 }) {
     super({ logger });
 
     this.cookieJar = new CookieJar();
@@ -50,6 +50,7 @@ module.exports = class DoiDownloader extends Downloader {
   getPdfUrl(doi) {
     let [_, site, additional] = doi.match(/(\d+.\d+)[/](.*)/);
     if (site.startsWith("0")) site = "1" + site;
+    if (!additional) return null;
 
     switch (site) {
       case "10.1002":
@@ -61,6 +62,7 @@ module.exports = class DoiDownloader extends Downloader {
       case "10.1016":
         return `https://api.elsevier.com/content/article/doi/${doi}`;
       case "10.1021":
+        // return null;
         return `https://pubs.acs.org/doi/pdf/${doi}`;
       case "10.1038":
         return `https://www.nature.com/articles/${additional}.pdf`;
@@ -77,6 +79,7 @@ module.exports = class DoiDownloader extends Downloader {
    */
   async downloadPDF(doi) {
     const pdfUrl = this.getPdfUrl(doi);
+    const downloadPath = path.join(this.downloadDir, `${doi}.pdf`);
 
     if (!pdfUrl) {
       this.logger.e(
@@ -87,6 +90,10 @@ module.exports = class DoiDownloader extends Downloader {
     }
 
     await this.getToken();
+    if (existsSync(downloadPath)) {
+      this.releaseToken();
+      return downloadPath;
+    }
     this.logger.i("DoiDownloader", `Start download PDF of ${doi}`);
 
     try {
@@ -108,7 +115,10 @@ module.exports = class DoiDownloader extends Downloader {
       return null;
     } finally {
       // Release token after download interval
-      setTimeout(() => this.releaseToken(), this.downloadInterval);
+      setTimeout(
+        () => this.releaseToken(),
+        this.downloadInterval + Math.random() * 3000
+      );
     }
 
     return path.join(this.downloadDir, `${doi}.pdf`);

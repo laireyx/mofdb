@@ -8,11 +8,15 @@ module.exports = class StringRegularizer extends Regularizer {
   regularizeString(str) {
     return str
       .trim()
+      .replace(/\s?([·,\-'/()/\[\]\{\}])\s?/g, "·")
+      .replace(/(?<!\d) ?(\d+) ?(?!\d)/g, "$1")
       .replace(/\s+/g, " ")
-      .replace(/·+/g, "·")
-      .replace(/[•×\$]/g, "·")
-      .replace(/\s?([·,\-'=/])\s?/g, "·")
-      .replace(/(?<!\d) ?(\d+) ?(?!\d)/g, "$1");
+      .replace(/′+/g, "'")
+      .replace(/[•×\$]+/g, "·")
+      .replace(/[\-–]+/g, "-")
+      .replace(/^[,·\-\s]+/g, "") // TrimStart
+      .replace(/[,·\-\s]+$/g, "") // TrimEnd
+      .replace(/cyclo/gi, "cyclo"); // Capital letters
   }
 
   async regularize() {

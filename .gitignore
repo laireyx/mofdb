@@ -9,5 +9,8 @@ config/
 data/
 pdfs/
 
+# Test data
+test/
+
 # Result and logs
 logs/
