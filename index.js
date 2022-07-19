@@ -11,7 +11,7 @@ parser.add_argument("-b", "--build", {
 });
 parser.add_argument("-c", "--chemical", {
   action: "store_true",
-  help: "Regularize String",
+  help: "Regularize Chemical",
 });
 parser.add_argument("-s", "--string", {
   action: "store_true",
