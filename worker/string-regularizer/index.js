@@ -21,7 +21,7 @@ module.exports = class StringRegularizer extends Regularizer {
   }
 
   async regularize() {
-    this.logger.startTask({ name: "Regularize" });
+    this.logger.startTask({ name: "StringRegularize" });
 
     return await this.reader.read().each(
       /**

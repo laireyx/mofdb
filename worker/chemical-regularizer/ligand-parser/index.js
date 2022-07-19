@@ -56,7 +56,7 @@ module.exports = class LigandParser {
           const trimmedString = matched[0]
             .replace(/^.*(and|of|with|by|on|the|from|the|as|two)\b/i, "")
             .replace(
-              /^.*?(using|following|(metallo)?ligands?|used|selected|namely|linkers?|choose|chose|complex(es)?|formula|polymer)/,
+              /^.*?(using|following|(metallo)?ligands?|used|selected|namely|linkers?|choose|chose|complex(es)?|formula|polymer)/g,
               ""
             )
             .replace(/\(\s*(H\s*\d*)?\s*L\s*\d*?\s*\)$/g, "")

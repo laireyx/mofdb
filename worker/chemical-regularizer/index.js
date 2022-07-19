@@ -13,9 +13,10 @@ module.exports = class ChemicalRegularizer extends Regularizer {
   }
 
   async regularize() {
-    this.logger.startTask({ name: "Regularize" });
+    this.logger.startTask({ name: "ChemicalRegularize" });
+    let regularizedCount = 0;
 
-    return await this.reader
+    await this.reader
       .read({
         order: [["doi", "ASC"]],
         where: {
@@ -91,6 +92,7 @@ module.exports = class ChemicalRegularizer extends Regularizer {
             return;
           }
 
+          regularizedCount++;
           this.logger.i(
             "ChemicalRegularizer",
             `${pdf}\n${JSON.stringify(parseResult, null, 2)}`
@@ -111,5 +113,10 @@ module.exports = class ChemicalRegularizer extends Regularizer {
           this.logger.stepTask({ curStep: 1, maxStep: 0 });
         }
       });
+
+    this.logger.i(
+      "ChemicalRegularizer",
+      "Regularized count: " + regularizedCount
+    );
   }
 };
