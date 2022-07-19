@@ -6,10 +6,11 @@ module.exports = class LigandParser {
   regularizeString(str) {
     return str
       .trim()
+      .replace(/\u0001-\u0002/g, "")
       .replace(/\s?([·,\-'/()/\[\]\{\}])\s?/g, "·")
       .replace(/(?<!\d) ?(\d+) ?(?!\d)/g, "$1")
       .replace(/\s+/g, " ")
-      .replace(/′’+/g, "'")
+      .replace(/[′’]/g, "'")
       .replace(/[·•×\$]+/g, "·")
       .replace(/[\-–]+/g, "-")
       .replace(/^[,·\-\s]+/g, "") // TrimStart
@@ -34,9 +35,20 @@ module.exports = class LigandParser {
 
     for (let page = 1; page <= doc.numPages; page++) {
       const pageContent = await doc.getPage(page);
-      const textContent = await pageContent.getTextContent();
+      const textStream = pageContent.streamTextContent();
+      const textReader = textStream.getReader();
+      let readTexts = [];
+      let readResult = await textReader.read();
 
-      const fullText = textContent.items.map((item) => item.str).join("");
+      while (!readResult.done) {
+        Array.prototype.push.apply(
+          readTexts,
+          readResult.value.items.map((item) => item.str)
+        );
+        readResult = await textReader.read();
+      }
+
+      const fullText = readTexts.join("");
 
       ligandRegexes.forEach((ligandRegex, ligandIdx) => {
         const matched = fullText.match(ligandRegex);
@@ -44,7 +56,7 @@ module.exports = class LigandParser {
           const trimmedString = matched[0]
             .replace(/^.*(and|of|with|by|on|the|from|the|as|two)\b/i, "")
             .replace(
-              /^.*?(using|(metallo)?ligands?|used|selected|namely|linkers|choose|chose|complex(es)?|formula|polymer)/,
+              /^.*?(using|following|(metallo)?ligands?|used|selected|namely|linkers?|choose|chose|complex(es)?|formula|polymer)/,
               ""
             )
             .replace(/\(\s*(H\s*\d*)?\s*L\s*\d*?\s*\)$/g, "")
@@ -56,6 +68,7 @@ module.exports = class LigandParser {
           if (regularizedString.replace(/\s/g, "").match(/^\((H\d*)?L\d*?\)$/))
             // Skip useless string
             return;
+          if (regularizedString === "") return;
 
           matchResult[ligandIdx].push(regularizedString);
         }
