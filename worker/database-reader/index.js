@@ -33,9 +33,11 @@ class DatabaseResult {
    */
   async each(cb) {
     let result;
+    let promises = Promise.resolve();
     while (!(result = await this.query.next()).done) {
-      result.value.forEach(cb);
+      promises = Promise.all([promises, ...result.value.map(cb)]);
     }
+    return await promises;
   }
 }
 
