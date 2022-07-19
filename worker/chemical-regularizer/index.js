@@ -92,18 +92,22 @@ module.exports = class ChemicalRegularizer extends Regularizer {
             return;
           }
 
-          regularizedCount++;
           this.logger.i(
             "ChemicalRegularizer",
             `${pdf}\n${JSON.stringify(parseResult, null, 2)}`
           );
 
+          let regularize = false;
+
           parseResult.forEach((result, i) => {
             if (result.every((r, i) => i === 0 || r === result[i - 1])) {
               if (result[0] === "") return;
+              regularize = true;
               mof[`namePrecursor${ligandIndices[i]}`] = result[0];
             }
           });
+
+          if (regularize) regularizedCount++;
 
           await mof.save();
         } catch (err) {

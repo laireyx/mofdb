@@ -5,21 +5,18 @@ const readline = require("readline");
 
 const Reader = require("../classes/reader");
 
-/** @type {typeof import('sequelize').Model} */
-const MOF = require("../../models").MOF;
-
 module.exports = class PorousReader extends Reader {
   /**
    * Reader
    * @param {object} ctor
    * @param {string[]} ctor.workDir
-   * @param {Logger} ctor.logger
-   * @param {boolean} [ctor.buildDb=false]
+   * @param {import('../classes/logger')} ctor.logger
+   * @param {typeof import('sequelize').Model} ctor.MOF
    */
-  constructor({ workDir, logger, buildDb = false } = {}) {
+  constructor({ workDir, logger, MOF } = {}) {
     super({ logger });
     this.workDir = workDir;
-    this.buildDb = buildDb;
+    this.MOF = MOF;
   }
 
   readDataFile(file, porousObj) {
@@ -77,7 +74,7 @@ module.exports = class PorousReader extends Reader {
 
     try {
       if (!porousObj.name) throw new Error(`No name`);
-      if (this.buildDb) await MOF.create(porousObj);
+      await this.MOF.create(porousObj);
     } catch (err) {
       this.logger.e("Reader", `${porous} ${err.message}`);
     }

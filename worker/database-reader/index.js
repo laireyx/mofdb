@@ -1,6 +1,4 @@
 const Reader = require("../classes/reader");
-/** @type {typeof import('sequelize').Model} */
-const MOF = require("../../models").MOF;
 
 class DatabaseResult {
   /**
@@ -46,16 +44,20 @@ module.exports = class DatabaseReader extends Reader {
    * Database Reader
    * @param {object} ctor
    * @param {import('../classes/reader').Logger} ctor.logger
+   * @param {typeof import('sequelize').Model} ctor.model
    * @param {number} ctor.chunkSize
    */
-  constructor({ logger, chunkSize = 1000 } = {}) {
+  constructor({ logger, model, chunkSize = 1000 } = {}) {
     super({ logger });
+    this.sequelize = require("../../models").sequelize;
+    this.model = model;
     this.chunkSize = chunkSize;
   }
 
   /**
    * Read entities in MOF DB
    * @param {import('sequelize').FindOptions} queryOpts
+   * @return {DatabaseResult}
    */
   read(queryOpts) {
     this.logger.i(
@@ -64,12 +66,12 @@ module.exports = class DatabaseReader extends Reader {
     );
 
     return new DatabaseResult(
-      (async function* (chunkSize) {
+      (async function* (chunkSize, model) {
         let offset = 0;
         let result;
 
         do {
-          result = await MOF.findAll({
+          result = await model.findAll({
             ...queryOpts,
             offset,
             limit: chunkSize,
@@ -78,7 +80,7 @@ module.exports = class DatabaseReader extends Reader {
 
           yield result;
         } while (result.length !== 0);
-      })(this.chunkSize)
+      })(this.chunkSize, this.model)
     );
   }
 };

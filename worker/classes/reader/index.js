@@ -15,5 +15,5 @@ module.exports = class Reader {
     this.logger = logger;
   }
 
-  async read({} = {}) {}
+  read({} = {}) {}
 };
