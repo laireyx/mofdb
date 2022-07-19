@@ -6,13 +6,17 @@
   "scripts": {
     "migrate": "npx sequelize-cli db:migrate",
     "unmigrate": "npx sequelize-cli db:migrate:undo",
-    "start": "node index.js",
+    "start": "node index.js -dcs",
+    "b": "node index.js -b",
+    "c": "node index.js -c",
+    "s": "node index.js -s",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "argparse": "^2.0.1",
     "dotenv": "^16.0.1",
     "download": "^8.0.0",
     "mysql2": "^2.3.3",
