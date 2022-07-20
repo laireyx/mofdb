@@ -6,7 +6,7 @@
   "scripts": {
     "migrate": "npx sequelize-cli db:migrate",
     "unmigrate": "npx sequelize-cli db:migrate:undo",
-    "start": "node index.js -dcsp",
+    "start": "node index.js -bcsp",
     "b": "node index.js -b",
     "c": "node index.js -c",
     "s": "node index.js -s",

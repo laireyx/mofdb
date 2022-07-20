@@ -13,7 +13,7 @@ const Precursor = require("./models").Precursor;
 
 module.exports = async function run(args) {
   const fileLogger = new FileLogger();
-  if (args.database) {
+  if (args.build) {
     const porousReader = new PorousReader({
       workDir: [
         "./data/1st_only_text/1st/Porous_set_1.0.0/Porous_DB_1.0.0",
