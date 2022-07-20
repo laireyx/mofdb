@@ -20,7 +20,7 @@ module.exports = (sequelize, DataTypes) => {
   Precursor.init(
     {
       name: DataTypes.STRING,
-      biggerId: DataTypes.INTEGER,
+      canonicalId: DataTypes.INTEGER,
     },
     {
       sequelize,

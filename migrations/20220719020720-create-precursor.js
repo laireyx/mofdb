@@ -18,7 +18,7 @@ module.exports = {
         name: {
           type: Sequelize.STRING,
         },
-        biggerId: {
+        canonicalId: {
           type: Sequelize.INTEGER,
         },
         createdAt: {
