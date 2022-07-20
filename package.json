@@ -23,6 +23,7 @@
     "mysql2": "^2.3.3",
     "pdfjs-dist": "^2.14.305",
     "sequelize": "^6.21.2",
+    "string-similarity": "^4.0.4",
     "tough-cookie": "^4.0.0"
   }
 }

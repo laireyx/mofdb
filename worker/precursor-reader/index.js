@@ -1,6 +1,7 @@
 const { Op } = require("sequelize");
 const Reader = require("../classes/reader");
 const DatabaseReader = require("../database-reader");
+const stringSimilarity = require("string-similarity");
 
 module.exports = class PrecursorReader extends Reader {
   /**
@@ -60,10 +61,8 @@ module.exports = class PrecursorReader extends Reader {
             ],
           ],
         })
-        .each(async (mof) => {
+        .sequentialEach(async (mof) => {
           const precursorName = mof[columnName];
-
-          this.logger.stepTask({ curStep: 0, maxStep: 1 });
 
           try {
             const existingCheck = await this.Precursor.findOne({
@@ -72,39 +71,43 @@ module.exports = class PrecursorReader extends Reader {
               },
             });
 
-            if (!existingCheck)
+            if (!existingCheck) {
               await this.Precursor.create({
                 name: precursorName,
               });
+            }
           } catch (err) {
             this.logger.e("PrecursorReader", err);
-          } finally {
-            this.logger.stepTask();
           }
         });
     }
 
-    await precursorReader.read().each(async (precursor) => {
-      const biggerCheck = await this.Precursor.findOne({
-        where: {
-          name: {
-            [Op.like]: `%${precursor.name}%`,
-            [Op.ne]: precursor.name,
-          },
-        },
-        order: [
-          mofReader.sequelize.fn(
-            "CHAR_LENGTH",
-            mofReader.sequelize.col("name")
-          ),
-        ],
-      });
+    const precursors = await precursorReader
+      .read()
+      .toArray()
+      .then((arr) => arr.map((precursor) => precursor.name));
 
-      precursor.biggerId = biggerCheck?.id;
+    this.logger.stepTask({ curStep: 0, maxStep: precursors.length });
 
-      if (precursor.biggerId) {
-        await precursor.save();
+    for (let i = 0; i < precursors.length; i++) {
+      this.logger.stepTask();
+      for (let j = i + 1; j < precursors.length; j++) {
+        const similarity = stringSimilarity.compareTwoStrings(
+          precursors[i],
+          precursors[j]
+        );
+        if (similarity > 0.95) {
+          this.logger.i(
+            "PrecursorReader",
+            `Similar string detected(${similarity})\n${precursors[i]}\n${precursors[j]}`
+          );
+        }
       }
-    });
+
+      // For update log
+      await new Promise((resolve, reject) => {
+        setImmediate(() => resolve());
+      });
+    }
   }
 };

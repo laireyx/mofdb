@@ -17,8 +17,7 @@ class DatabaseResult {
     let result;
     let resultArray = [];
     while (!(result = await this.query.next()).done) {
-      Array.push.apply(resultArray, result.value);
-      // resultArray = resultArray.concat(result.value);
+      resultArray = resultArray.concat(result.value);
     }
 
     return resultArray;
@@ -31,11 +30,25 @@ class DatabaseResult {
    */
   async each(cb) {
     let result;
-    let promises = Promise.resolve();
+    let promises = [];
     while (!(result = await this.query.next()).done) {
-      promises = Promise.all([promises, ...result.value.map(cb)]);
+      promises = promises.concat(result.value.map(cb));
     }
-    return await promises;
+    return await Promise.all(promises);
+  }
+
+  /**
+   * Call a function for each item from the query result sequentially
+   * @param {function} cb
+   * @return {Promise<Array<import('sequelize').Model>>}
+   */
+  async sequentialEach(cb) {
+    let result;
+    while (!(result = await this.query.next()).done) {
+      for (let i = 0; i < result.value.length; i++) {
+        await cb(result.value[i]);
+      }
+    }
   }
 }
 
