@@ -9,17 +9,21 @@ parser.add_argument("-b", "--build", {
   action: "store_true",
   help: "Build database",
 });
-parser.add_argument("-c", "--chemical", {
+parser.add_argument("-l", "--ligand", {
   action: "store_true",
-  help: "Regularize Chemical",
+  help: "Rename Ligand",
 });
-parser.add_argument("-s", "--string", {
+parser.add_argument("-r", "--string", {
   action: "store_true",
   help: "Regularize String",
 });
 parser.add_argument("-p", "--precursor", {
   action: "store_true",
-  help: "Regularize Precursor",
+  help: "Build Precursor database",
+});
+parser.add_argument("-s", "--similarity", {
+  action: "store_true",
+  help: "Similarity analysis for precursors",
 });
 
-require("./run")(parser.parse_args());
+require("./src/run")(parser.parse_args());

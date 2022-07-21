@@ -2,7 +2,7 @@ const fs = require("fs/promises");
 const existsSync = require("fs").existsSync;
 const path = require("path");
 
-const Downloader = require("../classes/downloader");
+const Downloader = require(".");
 const download = require("download");
 
 const { CookieJar } = require("tough-cookie");

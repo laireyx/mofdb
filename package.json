@@ -6,11 +6,12 @@
   "scripts": {
     "migrate": "npx sequelize-cli db:migrate",
     "unmigrate": "npx sequelize-cli db:migrate:undo",
-    "start": "node index.js -bcsp",
+    "start": "node index.js -blrps",
     "b": "node index.js -b",
-    "c": "node index.js -c",
-    "s": "node index.js -s",
+    "c": "node index.js -l",
+    "r": "node index.js -r",
     "p": "node index.js -p",
+    "s": "node index.js -s",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

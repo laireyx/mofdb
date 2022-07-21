@@ -11,12 +11,11 @@ module.exports = class Logger {
 
   task = {
     name: "",
-    lastETA: 0,
     progress: { max: 0, current: 0 },
   };
 
   progressLog = {
-    prevRate: 0,
+    prevTask: 0,
     prevDate: 0,
   };
 
@@ -68,10 +67,26 @@ module.exports = class Logger {
     this.task.progress.max = Math.max(max, 0);
     this.task.progress.current = 0;
 
-    this.progressLog.prevRate = 0;
+    this.progressLog.prevTask = 0;
     this.progressLog.prevDate = Date.now();
 
     this.printTask();
+  }
+
+  /**
+   * Set a maximum task progress
+   * @param {number} max
+   */
+  setTaskMax(max) {
+    this.task.progress.max = max;
+  }
+
+  /**
+   * Add a maximum task progress
+   * @param {number} max
+   */
+  addTaskMax(max) {
+    this.task.progress.max += max;
   }
 
   /**
@@ -93,10 +108,11 @@ module.exports = class Logger {
       ? this.task.progress.current / this.task.progress.max
       : 0;
     const progressPerSeconds =
-      (taskRate - this.progressLog.prevRate) /
+      (this.task.progress.current - this.progressLog.prevTask) /
       ((Date.now() - this.progressLog.prevDate) / 1000);
     const ETA = ~~(progressPerSeconds > 0
-      ? (1 - taskRate) / progressPerSeconds
+      ? (this.task.progress.max - this.task.progress.current) /
+        progressPerSeconds
       : 9e9);
 
     process.stdout.cursorTo(0);
@@ -124,7 +140,7 @@ module.exports = class Logger {
     );
     process.stdout.clearLine(1);
 
-    this.progressLog.prevRate = taskRate;
+    this.progressLog.prevTask = this.task.progress.current;
     this.progressLog.prevDate = Date.now();
 
     if (

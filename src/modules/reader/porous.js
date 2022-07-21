@@ -3,20 +3,18 @@ const { createReadStream } = require("fs");
 const path = require("path");
 const readline = require("readline");
 
-const Reader = require("../classes/reader");
+const Reader = require(".");
 
 module.exports = class PorousReader extends Reader {
   /**
    * Reader
    * @param {object} ctor
    * @param {string[]} ctor.workDir
-   * @param {import('../classes/logger')} ctor.logger
-   * @param {typeof import('sequelize').Model} ctor.MOF
+   * @param {import('../logger')} ctor.logger
    */
-  constructor({ workDir, logger, MOF } = {}) {
+  constructor({ workDir, logger } = {}) {
     super({ logger });
     this.workDir = workDir;
-    this.MOF = MOF;
   }
 
   readDataFile(file, porousObj) {
@@ -74,27 +72,36 @@ module.exports = class PorousReader extends Reader {
 
     try {
       if (!porousObj.name) throw new Error(`No name`);
-      await this.MOF.create(porousObj);
+      return porousObj;
     } catch (err) {
       this.logger.e("Reader", `${porous} ${err.message}`);
+      return null;
     }
   }
 
-  async read({} = {}) {
-    this.logger.startTask({ name: "Reading PorousDB" });
+  async *generate() {
+    for (const dir of this.workDir) {
+      const porouses = await fs.readdir(dir);
 
-    await Promise.all(
-      this.workDir.map(async (dir) => {
-        const porouses = await fs.readdir(dir);
-        this.logger.stepTask({ curStep: 0, maxStep: porouses.length });
+      for (const porous of porouses) {
+        const readResult = await this.readEachPorous({ workDir: dir, porous });
+        if (!readResult) continue;
+        yield [readResult];
+      }
+    }
+  }
 
-        await Promise.all(
-          porouses.map(async (porous) => {
-            await this.readEachPorous({ workDir: dir, porous });
-            this.logger.stepTask();
-          })
-        );
-      })
-    );
+  read({} = {}) {
+    return new Reader.ReadResult(this.generate());
+  }
+
+  async estimateCount() {
+    let count = 0;
+    for (const dir of this.workDir) {
+      const porouses = await fs.readdir(dir);
+      count += porouses.length;
+    }
+
+    return count;
   }
 };

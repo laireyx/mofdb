@@ -1,6 +1,6 @@
 const fs = require("fs");
 const path = require("path");
-const Logger = require("../classes/logger");
+const Logger = require(".");
 
 module.exports = class FileLogger extends Logger {
   /** @type {Object<string, fs.WriteStream>} */
