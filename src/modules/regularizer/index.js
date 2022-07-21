@@ -20,7 +20,7 @@ module.exports = class Regularizer {
   regularizeString(str) {
     return str
       .trim()
-      .replace(/\u0001-\u0002/g, "")
+      .replace(/[\u0001-\u0002]/g, "")
       .replace(/\s?([·,\-'/()/\[\]\{\}])\s?/g, "·")
       .replace(/(?<!\d) ?(\d+) ?(?!\d)/g, "$1")
       .replace(/\s+/g, " ")
