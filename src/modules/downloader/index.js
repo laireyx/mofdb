@@ -167,7 +167,9 @@ module.exports = class Downloader {
         `Failed to download ${downloadOpts.resource}. Tried URL is ${targetUrl}`
       );
 
-      await fs.unlink(downloadPath).catch(() => {});
+      await fs.unlink(downloadPath).catch((err) => {
+        console.error(err);
+      });
 
       return null;
     } finally {

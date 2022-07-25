@@ -26,6 +26,7 @@ module.exports = generateTask("AmountRegularize", async (logger) => {
      */
     async (mof) => {
       logger.stepTask();
+
       for (let i = 1; i <= 3; i++) {
         const columnName = `amountPrecursor${i}`;
         const precursorName = `namePrecursor${i}`;
@@ -47,17 +48,20 @@ module.exports = generateTask("AmountRegularize", async (logger) => {
             resource: mof[precursorName],
           });
           if (!weightFile) continue;
+
           const molWeight = await fs
             .readFile(weightFile)
             .then((buf) => buf.toString())
             .then((str) => parseFloat(str));
           const value = molAmount * molWeight;
+
           logger.i(
             "AmountRegularizer",
             `${molAmount}mol of ${mof[precursorName]} is ${value}(${molAmount} * ${molWeight}).`
           );
           if (molWeight) mof[columnName] = molWeight;
         } catch (err) {
+          console.error(err);
           logger.e("AmountRegularizer", err);
         }
       }
