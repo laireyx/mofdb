@@ -1,53 +1,20 @@
-const fs = require("fs/promises");
-const existsSync = require("fs").existsSync;
 const path = require("path");
 
 const Downloader = require(".");
-const download = require("download");
-
-const { CookieJar } = require("tough-cookie");
 
 module.exports = class DoiDownloader extends Downloader {
-  constructor({ logger, downloadDir = "pdfs", downloadInterval = 7000 }) {
-    super({ logger });
-
-    this.cookieJar = new CookieJar();
-    this.downloadDir = downloadDir;
-    this.downloadInterval = downloadInterval;
-
-    this.tokenQueue = null;
-
-    try {
-      fs.mkdir(this.downloadDir).catch(() => {});
-    } catch (err) {}
+  constructor({ logger, downloadDir = "pdfs", downloadInterval = 7000 } = {}) {
+    super({ logger, downloadDir, downloadInterval });
   }
-
-  /**
-   * Download pdf of resource(doi)
-   * @param {object} download
-   * @param {string} download.resource
-   */
-  async download({ resource = "" } = {}) {
-    if (resource.endsWith(";")) resource = resource.replace(/;$/, "");
-
-    const downloadPath = path.join(this.downloadDir, resource + ".pdf");
-    if (existsSync(downloadPath)) {
-      this.logger.i(
-        "DoiDownloader",
-        `Already downloaded ${resource}. Skip downloading this file`
-      );
-      return downloadPath;
-    }
-
-    return await this.downloadPDF(resource);
-  }
-
   /**
    * Get PDF URL from DOI
-   * @param {string} doi
+   * @param {Downloader.DownloadOpts} opts
    * @returns
    */
-  getPdfUrl(doi) {
+  getUrl(opts) {
+    let doi = opts.resource;
+    if (doi.endsWith(";")) doi = doi.replace(/;$/, "");
+
     let [_, site, additional] = doi.match(/(\d+.\d+)[/](.*)/);
     if (site.startsWith("0")) site = "1" + site;
     if (!additional) return null;
@@ -73,82 +40,28 @@ module.exports = class DoiDownloader extends Downloader {
   }
 
   /**
-   * Download PDF file using DOI.
-   * @param {string} doi
-   * @return {Promise}
+   * Get download path
+   * @param {Downloader.DownloadOpts} opts
+   * @return {string}
    */
-  async downloadPDF(doi) {
-    const pdfUrl = this.getPdfUrl(doi);
-    const downloadPath = path.join(this.downloadDir, `${doi}.pdf`);
+  getDownloadPath(opts) {
+    let doi = opts.resource;
+    if (doi.endsWith(";")) doi = doi.replace(/;$/, "");
 
-    if (!pdfUrl) {
-      this.logger.e(
-        "DoiDownloader",
-        `Cannot find appropriate PDF URL of DOI ${doi}`
-      );
-      return null;
-    }
-
-    await this.getToken();
-    if (existsSync(downloadPath)) {
-      this.releaseToken();
-      return downloadPath;
-    }
-    this.logger.i("DoiDownloader", `Start download PDF of ${doi}`);
-
-    try {
-      await download(pdfUrl, this.downloadDir, {
-        cookieJar: this.cookieJar,
-        headers: {
-          Accept: "application/pdf",
-          "Wiley-TDM-Client-Token": process.env["Wiley-TDM-Client-Token"],
-          "X-ELS-APIKey": process.env["X-ELS-APIKey"],
-        },
-        filename: `${doi}.pdf`,
-      });
-    } catch (err) {
-      console.error(err);
-      this.logger.e(
-        "DoiDownloader",
-        `Failed to download PDF of ${doi}. Tried URL is ${pdfUrl}`
-      );
-      return null;
-    } finally {
-      // Release token after download interval
-      setTimeout(
-        () => this.releaseToken(),
-        this.downloadInterval + Math.random() * 3000
-      );
-    }
-
-    return path.join(this.downloadDir, `${doi}.pdf`);
+    return path.join(this.downloadDir, doi + ".pdf");
   }
 
   /**
-   * Get a download token
-   * @return {Promise}
+   * Get crawling fetch option
+   * @return {object}
    */
-  getToken() {
-    if (!this.tokenQueue) {
-      this.tokenQueue = [];
-      return Promise.resolve();
-    }
-
-    return new Promise((resolve, reject) => {
-      this.tokenQueue.push({ resolve, reject });
-    });
-  }
-
-  /**
-   * Peek the first item and start downloading
-   */
-  releaseToken() {
-    if (this.tokenQueue.length === 0) {
-      this.tokenQueue = null;
-      return;
-    }
-
-    const { resolve } = this.tokenQueue.shift();
-    resolve();
+  getFetchOpts() {
+    return {
+      headers: {
+        Accept: "application/pdf",
+        "Wiley-TDM-Client-Token": process.env["Wiley-TDM-Client-Token"],
+        "X-ELS-APIKey": process.env["X-ELS-APIKey"],
+      },
+    };
   }
 };

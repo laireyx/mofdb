@@ -11,15 +11,19 @@ parser.add_argument("-b", "--build", {
 });
 parser.add_argument("-l", "--ligand", {
   action: "store_true",
-  help: "Rename Ligand",
+  help: "Rename ligand",
 });
 parser.add_argument("-r", "--string", {
   action: "store_true",
-  help: "Regularize String",
+  help: "Regularize string",
 });
 parser.add_argument("-p", "--precursor", {
   action: "store_true",
-  help: "Build Precursor database",
+  help: "Build precursor database",
+});
+parser.add_argument("-m", "--molecule", {
+  action: "store_true",
+  help: "Fill molecular weight",
 });
 parser.add_argument("-s", "--similarity", {
   action: "store_true",

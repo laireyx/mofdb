@@ -6,11 +6,12 @@
   "scripts": {
     "migrate": "npx sequelize-cli db:migrate",
     "unmigrate": "npx sequelize-cli db:migrate:undo",
-    "start": "node index.js -blrps",
+    "start": "node index.js -blrpms",
     "b": "node index.js -b",
-    "c": "node index.js -l",
+    "l": "node index.js -l",
     "r": "node index.js -r",
     "p": "node index.js -p",
+    "m": "node index.js -m",
     "s": "node index.js -s",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -21,6 +22,7 @@
     "argparse": "^2.0.1",
     "dotenv": "^16.0.1",
     "download": "^8.0.0",
+    "got": "^11.8.5",
     "mysql2": "^2.3.3",
     "pdfjs-dist": "^2.14.305",
     "sequelize": "^6.21.2",
