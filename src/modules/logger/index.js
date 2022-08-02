@@ -115,6 +115,8 @@ module.exports = class Logger {
         progressPerSeconds
       : 9e9);
 
+    if (!process.stdout.cursorTo) return;
+
     process.stdout.cursorTo(0);
     process.stdout.write(`[\x1b[32m${this.task.name}\x1b[0m]`);
 

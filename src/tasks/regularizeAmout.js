@@ -25,48 +25,59 @@ module.exports = generateTask("AmountRegularize", async (logger) => {
      * @param {import('sequelize').Model} mof
      */
     async (mof) => {
-      logger.stepTask();
+      try {
+        for (let i = 1; i <= 3; i++) {
+          try {
+            const columnName = `amountPrecursor${i}`;
+            const precursorName = `namePrecursor${i}`;
+            let molAmount;
 
-      for (let i = 1; i <= 3; i++) {
-        const columnName = `amountPrecursor${i}`;
-        const precursorName = `namePrecursor${i}`;
-        let molAmount;
+            if (!mof[columnName]) continue;
 
-        if (!mof[columnName]) continue;
+            if (mof[columnName].match(/([\d.]+) ?mmol/i)) {
+              molAmount =
+                parseFloat(mof[columnName].match(/([\d.]+) ?mmol/i)[1]) / 1000;
+            } else if (mof[columnName].match(/([\d.]+) ?mol/i)) {
+              molAmount = parseFloat(
+                mof[columnName].match(/([\d.]+) ?mol/i)[1]
+              );
+            }
 
-        if (mof[columnName].match(/([\d.]+) ?mmol/i)) {
-          molAmount =
-            parseFloat(mof[columnName].match(/([\d.]+) ?mmol/i)[1]) / 1000;
-        } else if (mof[columnName].match(/([\d.]+) ?mol/i)) {
-          molAmount = parseFloat(mof[columnName].match(/([\d.]+) ?mol/i)[1]);
+            if (!molAmount) continue;
+            const weightFile = await molWeightDownloader.download({
+              resource: mof[precursorName],
+            });
+            if (!weightFile) continue;
+
+            const molWeight = await fs
+              .readFile(weightFile)
+              .then((buf) => buf.toString())
+              .then((str) => parseFloat(str));
+            const value = molAmount * molWeight;
+
+            if (Number.isNaN(value))
+              throw new Error(
+                `Invalid molecular amount value: ${molAmount}mol * ${molWeight}`
+              );
+
+            logger.i(
+              "AmountRegularizer",
+              `${molAmount}mol of ${mof[precursorName]} is ${value}(${molAmount} * ${molWeight}).`
+            );
+
+            // Unit : mg
+            if (molWeight) mof[columnName] = molWeight * 1000;
+          } catch (err) {
+            logger.e("AmountRegularizer", `${mof[precursorName]} / ${err}`);
+          }
         }
 
-        if (!molAmount) continue;
-
-        try {
-          const weightFile = await molWeightDownloader.download({
-            resource: mof[precursorName],
-          });
-          if (!weightFile) continue;
-
-          const molWeight = await fs
-            .readFile(weightFile)
-            .then((buf) => buf.toString())
-            .then((str) => parseFloat(str));
-          const value = molAmount * molWeight;
-
-          logger.i(
-            "AmountRegularizer",
-            `${molAmount}mol of ${mof[precursorName]} is ${value}(${molAmount} * ${molWeight}).`
-          );
-          if (molWeight) mof[columnName] = molWeight;
-        } catch (err) {
-          console.error(err);
-          logger.e("AmountRegularizer", err);
-        }
+        await mof.save();
+      } catch (err) {
+        logger.e("AmountRegularizer", err);
+      } finally {
+        logger.stepTask();
       }
-
-      await mof.save();
     }
   );
 });

@@ -13,7 +13,7 @@ parser.add_argument("-l", "--ligand", {
   action: "store_true",
   help: "Rename ligand",
 });
-parser.add_argument("-r", "--string", {
+parser.add_argument("-r", "--regularize", {
   action: "store_true",
   help: "Regularize string",
 });

@@ -7,7 +7,7 @@ module.exports = async function run(args) {
     await require("./tasks/renameLigand")();
   }
 
-  if (args.string) {
+  if (args.regularize) {
     await require("./tasks/regularizeString")();
   }
 

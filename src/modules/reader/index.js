@@ -40,7 +40,11 @@ class ReadResult {
   async each(cb) {
     let result;
     while (!(result = await this.generator.next()).done) {
-      await Promise.all(result.value.map(cb));
+      try {
+        await Promise.all(result.value.map(cb));
+      } catch (err) {
+        console.error(err);
+      }
     }
   }
 

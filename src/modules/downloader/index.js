@@ -115,18 +115,20 @@ module.exports = class Downloader {
    * @return {Promise}
    */
   async downloadAsFile(url, dst, fetchOpts) {
-    const gotStream = got(url, {
+    const gotResponse = await got(url, {
       ...fetchOpts,
+      throwHttpErrors: false,
       cookieJar: this.cookieJar,
-      isStream: true,
-    }).on("error", () => {});
+    });
+
+    if (gotResponse.statusCode >= 400)
+      throw new Error(
+        `HTTP ${gotResponse.statusCode} : ${gotResponse.statusMessage} for ${url}`
+      );
 
     await fs.mkdir(path.dirname(dst), { recursive: true });
 
-    return await stream.pipeline(
-      gotStream,
-      (await fs.open(dst, "w")).createWriteStream()
-    );
+    return await fs.writeFile(dst, gotResponse.rawBody);
   }
 
   /**
@@ -161,15 +163,13 @@ module.exports = class Downloader {
 
       return downloadPath;
     } catch (err) {
-      console.error(err);
+      // console.error(err);
       this.logger.e(
         "Downloader",
         `Failed to download ${downloadOpts.resource}. Tried URL is ${targetUrl}`
       );
 
-      await fs.unlink(downloadPath).catch((err) => {
-        console.error(err);
-      });
+      await fs.rm(downloadPath, { force: true });
 
       return null;
     } finally {
