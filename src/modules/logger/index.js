@@ -59,8 +59,8 @@ module.exports = class Logger {
    * @param {number} task.max
    */
   startTask({ name = "Dummy task", max = 0 } = {}) {
-    if (this.task.progress.max !== this.task.progress.current)
-      process.stdout.write("\n");
+    if (this.task.progress.max !== this.task.progress.current) this.printTask();
+    process.stdout.write("\n");
 
     this.task.name = name;
 

@@ -23,7 +23,6 @@ module.exports = class Regularizer {
       .replace(/[\u0001-\u0002]/g, "")
       .replace(/\s+/g, " ")
       .replace(/\s?([·,\-'//\[\]\{\}])\s?/g, "·")
-      .replace(/(?<!\d) ?(\d+) ?(?!\d)/g, "$1")
       .replace(/[′’]/g, "'")
       .replace(/[·•×\$]+/g, "·")
       .replace(/[\-–]+/g, "-")

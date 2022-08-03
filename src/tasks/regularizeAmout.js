@@ -35,12 +35,12 @@ module.exports = generateTask("AmountRegularize", async (logger) => {
             if (!mof[columnName]) continue;
 
             if (mof[columnName].match(/([\d.]+) ?mmol/i)) {
-              molAmount =
-                parseFloat(mof[columnName].match(/([\d.]+) ?mmol/i)[1]) / 1000;
-            } else if (mof[columnName].match(/([\d.]+) ?mol/i)) {
               molAmount = parseFloat(
-                mof[columnName].match(/([\d.]+) ?mol/i)[1]
+                mof[columnName].match(/([\d.]+) ?mmol/i)[1]
               );
+            } else if (mof[columnName].match(/([\d.]+) ?mol/i)) {
+              molAmount =
+                parseFloat(mof[columnName].match(/([\d.]+) ?mol/i)[1]) * 1000;
             }
 
             if (!molAmount) continue;
@@ -62,11 +62,10 @@ module.exports = generateTask("AmountRegularize", async (logger) => {
 
             logger.i(
               "AmountRegularizer",
-              `${molAmount}mol of ${mof[precursorName]} is ${value}(${molAmount} * ${molWeight}).`
+              `${molAmount}mol of ${mof[precursorName]} is ${value}mg(${molAmount} * ${molWeight}).`
             );
 
-            // Unit : mg
-            if (molWeight) mof[columnName] = molWeight * 1000;
+            if (molWeight) mof[columnName] = molWeight;
           } catch (err) {
             logger.e("AmountRegularizer", `${mof[precursorName]} / ${err}`);
           }
