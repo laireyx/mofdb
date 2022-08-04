@@ -34,13 +34,28 @@ module.exports = generateTask("AmountRegularize", async (logger) => {
 
             if (!mof[columnName]) continue;
 
-            if (mof[columnName].match(/([\d.]+) ?mmol/i)) {
+            // Redundant information
+            if (mof[columnName].match(/([\d.]+) ?mg/i)) {
+              mof[columnName] = mof[columnName].match(/([\d.]+) ?mg/i)[1];
+              continue;
+            }
+
+            if (mof[columnName].match(/([\d.]+) ?\([\d.]+ ?m?mol\)/i)) {
+              mof[columnName] = mof[columnName].match(
+                /([\d.]+) ?\([\d.]+ ?m?mol\)/i
+              )[1];
+              continue;
+            }
+
+            // Wrong unit
+            if (mof[columnName].match(/([\d.]+) ?\(?mmol\)?/i)) {
               molAmount = parseFloat(
-                mof[columnName].match(/([\d.]+) ?mmol/i)[1]
+                mof[columnName].match(/([\d.]+) ?\(?mmol\)?/i)[1]
               );
-            } else if (mof[columnName].match(/([\d.]+) ?mol/i)) {
+            } else if (mof[columnName].match(/([\d.]+) ?\(?mol\)?/i)) {
               molAmount =
-                parseFloat(mof[columnName].match(/([\d.]+) ?mol/i)[1]) * 1000;
+                parseFloat(mof[columnName].match(/([\d.]+) ?\(?mol\)?/i)[1]) *
+                1000;
             }
 
             if (!molAmount) continue;
