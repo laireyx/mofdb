@@ -29,5 +29,9 @@ parser.add_argument("-s", "--similarity", {
   action: "store_true",
   help: "Similarity analysis for precursors",
 });
+parser.add_argument("-e", "--extract", {
+  action: "store_true",
+  help: "Extract chemical test",
+});
 
 require("./src/run")(parser.parse_args());

@@ -22,4 +22,8 @@ module.exports = async function run(args) {
   if (args.similarity) {
     await require("./tasks/similarityCheck")();
   }
+
+  if (args.extract) {
+    await require("./tasks/extract")();
+  }
 };
