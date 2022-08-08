@@ -22,10 +22,11 @@ module.exports = class Regularizer {
       .trim()
       .replace(/[\u0001-\u0002]/g, "")
       .replace(/\s+/g, " ")
-      .replace(/\s?([·,\-'//\[\]\{\}])\s?/g, "·")
+      .replace(/\s?([·,\-/])\s?/g, "·")
       .replace(/[′’]/g, "'")
       .replace(/[·•×\$]+/g, "·")
       .replace(/[\-–]+/g, "-")
+      .replace(/\( | \)/g, "")
       .replace(/^[,·\-\s]+/g, "") // TrimStart
       .replace(/[,·\-\s]+$/g, "") // TrimEnd
       .replace(/cyclo/gi, "cyclo"); // Capital letters
