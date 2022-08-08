@@ -17,10 +17,6 @@ parser.add_argument("-r", "--regularize", {
   action: "store_true",
   help: "Regularize string",
 });
-parser.add_argument("-p", "--precursor", {
-  action: "store_true",
-  help: "Build precursor database",
-});
 parser.add_argument("-m", "--molecule", {
   action: "store_true",
   help: "Fill molecular weight",
@@ -28,6 +24,10 @@ parser.add_argument("-m", "--molecule", {
 parser.add_argument("-s", "--similarity", {
   action: "store_true",
   help: "Similarity analysis for precursors",
+});
+parser.add_argument("-p", "--precursor", {
+  action: "store_true",
+  help: "Build precursor database",
 });
 
 require("./src/run")(parser.parse_args());
