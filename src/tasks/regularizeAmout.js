@@ -59,20 +59,9 @@ module.exports = generateTask("AmountRegularize", async (logger) => {
             }
 
             if (!molAmount) continue;
-
-            let weightFile = await (async () => {
-              const pubchemResult = await molWeightDownloader.download({
-                resource: mof[precursorName],
-              });
-              if (pubchemResult) return pubchemResult;
-
-              const sigmaResult = await molWeightDownloader.download({
-                resource: mof[precursorName],
-                sigma: true,
-              });
-              return sigmaResult;
-            })();
-
+            const weightFile = await molWeightDownloader.download({
+              resource: mof[precursorName],
+            });
             if (!weightFile) continue;
 
             const molWeight = await fs
