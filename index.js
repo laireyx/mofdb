@@ -29,5 +29,9 @@ parser.add_argument("-p", "--precursor", {
   action: "store_true",
   help: "Build precursor database",
 });
+parser.add_argument("-e", "--extract", {
+  action: "store_true",
+  help: "Extract tokens",
+});
 
 require("./src/run")(parser.parse_args());

@@ -1,51 +1,78 @@
 const Regularizer = require(".");
 
 module.exports = class ExtractRegularizer extends Regularizer {
+  unit = [
+    "mono",
+    "di",
+    "bis",
+    "tri",
+    "tris",
+    "tetra",
+    "tetrakis",
+    "penta",
+    "pentakis",
+    "hexa",
+    "hexakis",
+    "hepta",
+    "heptakis",
+    "octa",
+    "octakis",
+    "nona",
+    "nonakis",
+    "deca",
+    "decakis",
+
+    "iso",
+    "cis",
+    "trans",
+
+    "cyclo",
+
+    "phospho",
+    "chloro",
+    "bromo",
+
+    "amino",
+
+    "methyl",
+    "ethyl",
+    "propyl",
+    "phenyl",
+
+    "pyridyl",
+
+    "\\d+[']*(·\\d+[']*)*[·]?", // quantifier
+    "(?:([A-Z][a-z]{0,1}\\d*|\\([A-Z][a-z]{0,1}\\d*\\))+)", // chemical
+  ];
+  delims = [",", ".", " "];
+
   /**
    *
    * @param {*} mof
    * @returns
    */
   async regularize(mof) {
-    const prefixes = [
-      "iso",
-      "mono",
-      "di",
-      "bis",
-      "tri",
-      "tris",
-      "tetra",
-      "tetrakis",
-      "penta",
-      "pentakis",
-      "hexa",
-      "hexakis",
-      "hepta",
-      "heptakis",
-      "octa",
-      "octakis",
-      "nona",
-      "nonakis",
-      "deca",
-      "decakis",
+    const targetStrings = [
+      mof.name ?? "",
+      mof.namePrecursor1 ?? "",
+      mof.namePrecursor2 ?? "",
+      mof.namePrecursor3 ?? "",
+      mof.nameSolvent1 ?? "",
+      mof.nameSolvent2 ?? "",
+      mof.nameSolvent3 ?? "",
     ];
-    const postfixes = ["yl", "ene"];
 
-    const regex = new RegExp(`${prefixes}.*${postfixes}`, "gi");
-    const matchResults = [];
+    const delimRegex = new RegExp(`[${this.delims.join()}]`);
+    const regex = new RegExp(
+      `(?:${this.unit.join("|")})+|[({[].*?[)}\]]|.*`,
+      "gi"
+    );
 
-    matchResults.push(...mof.name.match(regex));
-    if (mof.namePrecursor1)
-      matchResults.push(...mof.namePrecursor1.match(regex));
-    if (mof.namePrecursor2)
-      matchResults.push(...mof.namePrecursor2.match(regex));
-    if (mof.namePrecursor3)
-      matchResults.push(...mof.namePrecursor3.match(regex));
-
-    if (mof.nameSolvent1) matchResults.push(...mof.nameSolvent1.match(regex));
-    if (mof.nameSolvent2) matchResults.push(...mof.nameSolvent2.match(regex));
-    if (mof.nameSolvent3) matchResults.push(...mof.nameSolvent3.match(regex));
-
-    return matchResults;
+    return targetStrings
+      .map((str) =>
+        str.split(delimRegex).map((splittedStr) => splittedStr.match(regex))
+      )
+      .flat(99)
+      .filter((_) => _);
   }
 };

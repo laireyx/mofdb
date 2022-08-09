@@ -22,4 +22,8 @@ module.exports = async function run(args) {
   if (args.precursor) {
     await require("./tasks/buildPrecursor")();
   }
+
+  if (args.extract) {
+    await require("./tasks/extract")();
+  }
 };
