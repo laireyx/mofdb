@@ -13,7 +13,7 @@ module.exports = generateTask(
   async function (logger) {
     const NGRAM_N = 100;
     const MINIMUM_N = 4;
-    const MINIMUM_FREQ = 3;
+    const MINIMUM_FREQ = 5;
 
     const mofReader = new DatabaseReader({
       logger,
@@ -61,8 +61,8 @@ module.exports = generateTask(
           for (let j = 0; j <= n - _n; j++) {
             const subgram = ngram.substring(j, j + _n);
 
-            const subgramPriority = nGrams[_n].get(subgram);
-            if (subgramPriority / ngramPriority) nGrams[_n].delete(subgram);
+            const subgramPriority = nGrams[_n].get(subgram) * _n;
+            if (subgramPriority < ngramPriority) nGrams[_n].delete(subgram);
           }
         }
       }

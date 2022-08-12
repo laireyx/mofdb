@@ -35,17 +35,16 @@ module.exports = class NgramExtracter extends Extracter {
     const ret = [];
 
     for (let n = 0; n < this.nGramsCount; n++) ret[n] = [];
-
-    for (let n = this.minimumN; n < this.nGramsCount; n++) {
-      targetStrings
-        .map((str) => str.split(/\W+/))
-        .flat()
-        .forEach((str) => {
+    targetStrings
+      .map((str) => str.toLowerCase().split(/\W+/))
+      .flat()
+      .forEach((str) => {
+        for (let n = this.minimumN; n < this.nGramsCount; n++) {
           for (let i = 0; i <= str.length - n; i++) {
             ret[n].push(str.substring(i, i + n));
           }
-        });
-    }
+        }
+      });
 
     return ret;
   }
