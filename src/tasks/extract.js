@@ -50,6 +50,8 @@ module.exports = generateTask(
       });
     });
 
+    const deleteNgrams = [];
+
     for (let n = NGRAM_N; n >= MINIMUM_N + 1; n--) {
       for (const [ngram, freq] of nGrams[n]) {
         if (freq <= MINIMUM_FREQ) continue;
@@ -61,12 +63,24 @@ module.exports = generateTask(
           for (let j = 0; j <= n - _n; j++) {
             const subgram = ngram.substring(j, j + _n);
 
-            const subgramPriority = nGrams[_n].get(subgram) * _n;
-            if (subgramPriority < ngramPriority) nGrams[_n].delete(subgram);
+            const subgramFreq = nGrams[_n].get(subgram) ?? 0;
+            const subgramPriority = subgramFreq * _n;
+            if (subgramPriority < ngramPriority) {
+              deleteNgrams.push(subgram);
+            }
+
+            if (ngramPriority < subgramPriority) {
+              deleteNgrams.push(ngram);
+              break;
+            }
           }
         }
       }
     }
+
+    deleteNgrams.forEach((ngram) => {
+      nGrams[ngram.length].delete(ngram);
+    });
 
     for (let n = NGRAM_N; n >= MINIMUM_N; n--) {
       for (const [ngram, freq] of nGrams[n]) {
