@@ -14,6 +14,7 @@ module.exports = generateTask(
     const NGRAM_N = 100;
     const MINIMUM_N = 4;
     const MINIMUM_FREQ = 5;
+    const THRESHOLD = 0.95;
 
     const mofReader = new DatabaseReader({
       logger,
@@ -65,11 +66,11 @@ module.exports = generateTask(
 
             const subgramFreq = nGrams[_n].get(subgram) ?? 0;
             const subgramPriority = subgramFreq * _n;
-            if (subgramPriority < ngramPriority) {
+            if (subgramPriority < ngramPriority * THRESHOLD) {
               deleteNgrams.push(subgram);
             }
 
-            if (ngramPriority < subgramPriority) {
+            if (ngramPriority < subgramPriority * THRESHOLD) {
               deleteNgrams.push(ngram);
               break;
             }
