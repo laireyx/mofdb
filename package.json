@@ -13,6 +13,7 @@
     "m": "node index.js -m",
     "s": "node index.js -s",
     "p": "node index.js -p",
+    "d": "node index.js -d",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -25,7 +26,7 @@
     "got": "^11.8.5",
     "mysql2": "^2.3.3",
     "pdfjs-dist": "^2.14.305",
-    "sequelize": "^6.21.2",
+    "sequelize": "^6.21.4",
     "string-similarity": "^4.0.4",
     "tough-cookie": "^4.0.0"
   }

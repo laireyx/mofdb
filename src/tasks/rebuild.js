@@ -1,17 +1,20 @@
 const generateTask = require(".");
 const DatabaseReader = require("../modules/reader/database");
-const MOFRegularizer = require("../modules/regularizer/mof");
+const SemanticRebuilder = require("../modules/rebuilder/semantic");
 
 /** @type {Model} */
-const SemanticUnit = require("../../models").SemanticUnit;
+const { MOF } = require("../../models");
 
 module.exports = generateTask("Rebuild", async (logger) => {
   const mofReader = new DatabaseReader({
     logger,
-    model: SemanticUnit,
+    model: MOF,
   });
+  const rebuilder = new SemanticRebuilder({ logger });
 
   logger.setTaskMax(await mofReader.estimateCount());
+
+  await rebuilder.prepare();
 
   return await mofReader.read().each(
     /**
@@ -21,9 +24,11 @@ module.exports = generateTask("Rebuild", async (logger) => {
     async (mof) => {
       logger.stepTask();
 
-      // await SemanticUnit.findOne({ name });
+      const rebuildResult = rebuilder.rebuild(mof);
 
-      logger.i("Rebuild", `${mof.name}`);
+      for (const [k, v] of Object.entries(rebuildResult)) {
+        logger.i("Rebuild", `${mof[k]} => ${JSON.stringify(v)}`);
+      }
     }
   );
 });

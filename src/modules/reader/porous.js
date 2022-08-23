@@ -18,7 +18,7 @@ module.exports = class PorousReader extends Reader {
   }
 
   readDataFile(file, porousObj) {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       const rl = readline.createInterface({
         input: createReadStream(file),
       });

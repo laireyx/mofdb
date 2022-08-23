@@ -26,4 +26,8 @@ module.exports = async function run(args) {
   if (args.extract) {
     await require("./tasks/extract")();
   }
+
+  if (args.rebuild) {
+    await require("./tasks/rebuild")();
+  }
 };

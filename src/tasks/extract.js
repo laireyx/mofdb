@@ -1,7 +1,8 @@
 const generateTask = require(".");
 const DatabaseReader = require("../modules/reader/database");
 
-const { MOF } = require("../../models");
+const { MOF, SemanticUnit } = require("../../models");
+
 const NgramExtracter = require("../modules/extracter/ngram");
 
 module.exports = generateTask(
@@ -12,9 +13,12 @@ module.exports = generateTask(
    */
   async function (logger) {
     const NGRAM_N = 100;
-    const MINIMUM_N = 4;
+
+    const MINIMUM_N = 3;
     const MINIMUM_FREQ = 5;
-    const THRESHOLD = 0.95;
+
+    const THRESHOLD_SUBGRAM = 0.9;
+    const THRESHOLD_SUPERGRAM = 0.25;
 
     const mofReader = new DatabaseReader({
       logger,
@@ -26,6 +30,8 @@ module.exports = generateTask(
       nGramsCount: NGRAM_N,
       minimumN: MINIMUM_N,
     });
+
+    await SemanticUnit.truncate();
 
     logger.addTaskMax(await mofReader.estimateCount());
 
@@ -66,11 +72,11 @@ module.exports = generateTask(
 
             const subgramFreq = nGrams[_n].get(subgram) ?? 0;
             const subgramPriority = subgramFreq * _n;
-            if (subgramPriority < ngramPriority * THRESHOLD) {
+            if (subgramPriority < ngramPriority * THRESHOLD_SUBGRAM) {
               deleteNgrams.push(subgram);
             }
 
-            if (ngramPriority < subgramPriority * THRESHOLD) {
+            if (ngramPriority < subgramPriority * THRESHOLD_SUPERGRAM) {
               deleteNgrams.push(ngram);
               break;
             }
@@ -83,11 +89,19 @@ module.exports = generateTask(
       nGrams[ngram.length].delete(ngram);
     });
 
+    let suid = 0;
     for (let n = NGRAM_N; n >= MINIMUM_N; n--) {
       for (const [ngram, freq] of nGrams[n]) {
         if (freq <= MINIMUM_FREQ) continue;
         // get data sorted
         logger.i("Extract", `${ngram}=${freq}`);
+
+        await SemanticUnit.create({
+          name: ngram,
+          suid,
+        });
+
+        suid++;
       }
     }
   }

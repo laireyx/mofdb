@@ -33,5 +33,9 @@ parser.add_argument("-e", "--extract", {
   action: "store_true",
   help: "Extract tokens",
 });
+parser.add_argument("-d", "--rebuild", {
+  action: "store_true",
+  help: "Rebuild using semantic units",
+});
 
 require("./src/run")(parser.parse_args());
