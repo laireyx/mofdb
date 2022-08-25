@@ -19,6 +19,7 @@ module.exports = class NgramExtracter extends Extracter {
     super({ logger });
     this.nGramsCount = nGramsCount;
     this.minimumN = minimumN;
+    this.chemRegex = /([A-Z][a-z]{0,2}\d*)+/dg;
   }
 
   extract(mof) {
@@ -35,7 +36,16 @@ module.exports = class NgramExtracter extends Extracter {
     const ret = [];
 
     for (let n = 0; n < this.nGramsCount; n++) ret[n] = [];
+
     targetStrings
+      .flatMap((str) => str.match(this.chemRegex) ?? [])
+      .forEach((chemForm) => {
+        const len = chemForm.length;
+        if (len >= this.minimumN) ret[len].push(chemForm.toLowerCase());
+      });
+
+    targetStrings
+      .map((str) => str.replace(this.chemRegex, ""))
       .map((str) => str.toLowerCase().split(/\W+/))
       .flat()
       .forEach((str) => {

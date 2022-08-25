@@ -21,23 +21,34 @@ module.exports = generateTask(
       MOF,
     });
 
-    logger.setTaskMax(await porousReader.estimateCount());
+    // logger.setTaskMax(await porousReader.estimateCount());
 
-    return await porousReader.read().each(async (porousObj) => {
-      try {
-        await MOF.create(porousObj);
-      } catch (err) {
-        logger.e(
-          "PorousBuilder",
-          `Failed to create db entity for:\n${JSON.stringify(
-            porousObj,
-            null,
-            2
-          )}`
-        );
-      } finally {
-        logger.stepTask();
-      }
-    });
+    const porouses = await porousReader.read().toArray();
+
+    try {
+      await MOF.bulkCreate(porouses);
+    } catch (err) {
+      logger.e(
+        "PorousBuilder",
+        `Failed to create db entity for:\n${JSON.stringify(porousObj, null, 2)}`
+      );
+    }
+
+    // return await porousReader.read().each(async (porousObj) => {
+    //   try {
+    //     await MOF.create(porousObj);
+    //   } catch (err) {
+    //     logger.e(
+    //       "PorousBuilder",
+    //       `Failed to create db entity for:\n${JSON.stringify(
+    //         porousObj,
+    //         null,
+    //         2
+    //       )}`
+    //     );
+    //   } finally {
+    //     logger.stepTask();
+    //   }
+    // });
   }
 );

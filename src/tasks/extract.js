@@ -19,8 +19,8 @@ module.exports = generateTask(
 
     const LENGTH_PRIORITY = 1;
 
-    const THRESHOLD_SUBGRAM = 0.8;
-    const THRESHOLD_SUPERGRAM = 1;
+    const THRESHOLD_SUBGRAM = 1.25;
+    const THRESHOLD_SUPERGRAM = 0.5;
 
     const mofReader = new DatabaseReader({
       logger,
@@ -89,8 +89,10 @@ module.exports = generateTask(
     }
 
     deleteNgrams.forEach((ngram) => {
-      nGrams[ngram.length].delete(ngram);
+      nGrams[ngram.length]?.delete(ngram);
     });
+
+    const sus = [];
 
     let suid = 0;
     for (let n = NGRAM_N; n >= MINIMUM_N; n--) {
@@ -99,7 +101,7 @@ module.exports = generateTask(
         // get data sorted
         logger.i("Extract", `${ngram}=${freq}`);
 
-        await SemanticUnit.create({
+        sus.push({
           name: ngram,
           suid,
         });
@@ -107,5 +109,6 @@ module.exports = generateTask(
         suid++;
       }
     }
+    await SemanticUnit.bulkCreate(sus);
   }
 );
