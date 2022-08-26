@@ -15,11 +15,13 @@ module.exports = generateTask(
     const NGRAM_N = 100;
 
     const MINIMUM_N = 3;
-    const MINIMUM_PRIORITY = 100;
+    const MINIMUM_OUTPUT_N = 4;
+    const MINIMUM_PRIORITY = 1000;
 
-    const LENGTH_PRIORITY = 1;
+    const LENGTH_PRIORITY = 2;
+    const FREQ_PRIORITY = 1.5;
 
-    const THRESHOLD_SUBGRAM = 1.25;
+    const THRESHOLD_SUBGRAM = 1.2;
     const THRESHOLD_SUPERGRAM = 0.5;
 
     const mofReader = new DatabaseReader({
@@ -63,17 +65,19 @@ module.exports = generateTask(
 
     for (let n = NGRAM_N; n >= MINIMUM_N + 1; n--) {
       for (const [ngram, freq] of nGrams[n]) {
-        if (freq * n ** LENGTH_PRIORITY <= MINIMUM_PRIORITY) continue;
+        if (freq ** FREQ_PRIORITY * n ** LENGTH_PRIORITY <= MINIMUM_PRIORITY)
+          continue;
 
         // Remove subgrams
-        const ngramPriority = freq * n ** LENGTH_PRIORITY;
+        const ngramPriority = freq ** FREQ_PRIORITY * n ** LENGTH_PRIORITY;
 
         for (let _n = n - 1; _n >= MINIMUM_N; _n--) {
           for (let j = 0; j <= n - _n; j++) {
             const subgram = ngram.substring(j, j + _n);
 
             const subgramFreq = nGrams[_n].get(subgram) ?? 0;
-            const subgramPriority = subgramFreq * _n ** LENGTH_PRIORITY;
+            const subgramPriority =
+              subgramFreq ** FREQ_PRIORITY * _n ** LENGTH_PRIORITY;
 
             if (ngramPriority < subgramPriority * THRESHOLD_SUPERGRAM) {
               deleteNgrams.add(ngram);
@@ -95,9 +99,10 @@ module.exports = generateTask(
     const sus = [];
 
     let suid = 0;
-    for (let n = NGRAM_N; n >= MINIMUM_N; n--) {
+    for (let n = NGRAM_N; n >= MINIMUM_OUTPUT_N; n--) {
       for (const [ngram, freq] of nGrams[n]) {
-        if (freq * n ** LENGTH_PRIORITY <= MINIMUM_PRIORITY) continue;
+        if (freq ** FREQ_PRIORITY * n ** LENGTH_PRIORITY <= MINIMUM_PRIORITY)
+          continue;
         // get data sorted
         logger.i("Extract", `${ngram}=${freq}`);
 

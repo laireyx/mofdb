@@ -19,7 +19,7 @@ module.exports = class NgramExtracter extends Extracter {
     super({ logger });
     this.nGramsCount = nGramsCount;
     this.minimumN = minimumN;
-    this.chemRegex = /([A-Z][a-z]{0,2}\d*)+/dg;
+    this.chemRegex = /([A-Z][a-z]{0,2}\d*)+/g;
   }
 
   extract(mof) {
