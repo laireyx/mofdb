@@ -17,8 +17,8 @@ module.exports = generateTask(
     const MINIMUM_N = 3;
     const MINIMUM_FREQ = 5;
 
-    const THRESHOLD_SUBGRAM = 0.9;
-    const THRESHOLD_SUPERGRAM = 0.25;
+    const THRESHOLD_SUBGRAM = 1.2;
+    const THRESHOLD_SUPERGRAM = 0.833;
 
     const mofReader = new DatabaseReader({
       logger,
