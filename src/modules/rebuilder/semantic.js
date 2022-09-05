@@ -23,27 +23,42 @@ module.exports = class SemanticRebuilder {
       this.everySu = semanticUnits.map((unit) => unit.name);
     });
 
-    this.testRegex = new RegExp(this.everySu.join("|"), "gi");
+    this.testRegex = new RegExp(`(?=(${this.everySu.join("|")}))`, "gi");
   }
 
   rebuild(mof) {
     const rebuildResult = {};
 
-    if (mof.name) rebuildResult.name = mof.name.match(this.testRegex);
+    if (mof.name)
+      rebuildResult.name = [...mof.name.matchAll(this.testRegex)].map(
+        (x) => x[1]
+      );
 
     if (mof.namePrecursor1)
-      rebuildResult.namePrecursor1 = mof.namePrecursor1.match(this.testRegex);
+      rebuildResult.namePrecursor1 = [
+        ...mof.namePrecursor1.matchAll(this.testRegex),
+      ].map((x) => x[1]);
     if (mof.namePrecursor2)
-      rebuildResult.namePrecursor2 = mof.namePrecursor2.match(this.testRegex);
+      rebuildResult.namePrecursor2 = [
+        ...mof.namePrecursor2.matchAll(this.testRegex),
+      ].map((x) => x[1]);
     if (mof.namePrecursor3)
-      rebuildResult.namePrecursor3 = mof.namePrecursor3.match(this.testRegex);
+      rebuildResult.namePrecursor3 = [
+        ...mof.namePrecursor3.matchAll(this.testRegex),
+      ].map((x) => x[1]);
 
     if (mof.nameSolvent1)
-      rebuildResult.nameSolvent1 = mof.nameSolvent1.match(this.testRegex);
+      rebuildResult.nameSolvent1 = [
+        ...mof.nameSolvent1.matchAll(this.testRegex),
+      ].map((x) => x[1]);
     if (mof.nameSolvent2)
-      rebuildResult.nameSolvent2 = mof.nameSolvent2.match(this.testRegex);
+      rebuildResult.nameSolvent2 = [
+        ...mof.nameSolvent2.matchAll(this.testRegex),
+      ].map((x) => x[1]);
     if (mof.nameSolvent3)
-      rebuildResult.nameSolvent3 = mof.nameSolvent3.match(this.testRegex);
+      rebuildResult.nameSolvent3 = [
+        ...mof.nameSolvent3.matchAll(this.testRegex),
+      ].map((x) => x[1]);
 
     return rebuildResult;
   }

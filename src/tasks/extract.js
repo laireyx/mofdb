@@ -15,10 +15,14 @@ module.exports = generateTask(
     const NGRAM_N = 100;
 
     const MINIMUM_N = 3;
-    const MINIMUM_FREQ = 5;
+    const MINIMUM_OUTPUT_N = 4;
+    const MINIMUM_PRIORITY = 1000;
+
+    const LENGTH_PRIORITY = 2;
+    const FREQ_PRIORITY = 1.5;
 
     const THRESHOLD_SUBGRAM = 1.2;
-    const THRESHOLD_SUPERGRAM = 0.833;
+    const THRESHOLD_SUPERGRAM = 0.5;
 
     const mofReader = new DatabaseReader({
       logger,
@@ -57,28 +61,31 @@ module.exports = generateTask(
       });
     });
 
-    const deleteNgrams = [];
+    const deleteNgrams = new Set();
 
     for (let n = NGRAM_N; n >= MINIMUM_N + 1; n--) {
       for (const [ngram, freq] of nGrams[n]) {
-        if (freq <= MINIMUM_FREQ) continue;
+        if (freq ** FREQ_PRIORITY * n ** LENGTH_PRIORITY <= MINIMUM_PRIORITY)
+          continue;
 
         // Remove subgrams
-        const ngramPriority = freq * n;
+        const ngramPriority = freq ** FREQ_PRIORITY * n ** LENGTH_PRIORITY;
 
         for (let _n = n - 1; _n >= MINIMUM_N; _n--) {
           for (let j = 0; j <= n - _n; j++) {
             const subgram = ngram.substring(j, j + _n);
 
             const subgramFreq = nGrams[_n].get(subgram) ?? 0;
-            const subgramPriority = subgramFreq * _n;
-            if (subgramPriority < ngramPriority * THRESHOLD_SUBGRAM) {
-              deleteNgrams.push(subgram);
-            }
+            const subgramPriority =
+              subgramFreq ** FREQ_PRIORITY * _n ** LENGTH_PRIORITY;
 
             if (ngramPriority < subgramPriority * THRESHOLD_SUPERGRAM) {
-              deleteNgrams.push(ngram);
+              deleteNgrams.add(ngram);
               break;
+            }
+
+            if (subgramPriority < ngramPriority * THRESHOLD_SUBGRAM) {
+              deleteNgrams.add(subgram);
             }
           }
         }
@@ -86,17 +93,20 @@ module.exports = generateTask(
     }
 
     deleteNgrams.forEach((ngram) => {
-      nGrams[ngram.length].delete(ngram);
+      nGrams[ngram.length]?.delete(ngram);
     });
 
+    const sus = [];
+
     let suid = 0;
-    for (let n = NGRAM_N; n >= MINIMUM_N; n--) {
+    for (let n = NGRAM_N; n >= MINIMUM_OUTPUT_N; n--) {
       for (const [ngram, freq] of nGrams[n]) {
-        if (freq <= MINIMUM_FREQ) continue;
+        if (freq ** FREQ_PRIORITY * n ** LENGTH_PRIORITY <= MINIMUM_PRIORITY)
+          continue;
         // get data sorted
         logger.i("Extract", `${ngram}=${freq}`);
 
-        await SemanticUnit.create({
+        sus.push({
           name: ngram,
           suid,
         });
@@ -104,5 +114,6 @@ module.exports = generateTask(
         suid++;
       }
     }
+    await SemanticUnit.bulkCreate(sus);
   }
 );
